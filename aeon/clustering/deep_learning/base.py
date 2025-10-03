@@ -5,6 +5,8 @@ __maintainer__ = []
 from abc import abstractmethod
 from copy import deepcopy
 
+import matplotlib.pyplot as plt
+
 from aeon.base._base import _clone_estimator
 from aeon.clustering._k_means import TimeSeriesKMeans
 from aeon.clustering.base import BaseClusterer
@@ -78,6 +80,35 @@ class BaseDeepClusterer(BaseClusterer):
 
         """
         return self.history.history if self.history is not None else None
+
+    def plot_loss_keras(self, save_path=None):
+        """
+        Plot the training and validation loss curves.
+
+        Parameters
+        ----------
+        save_path : str or None, optional (default=None)
+            If provided, the plot will be saved to this path as a PNG file.
+            If None, the plot will be displayed.
+
+        Returns
+        -------
+        None
+        """
+        loss_values = self.summary()["loss"]
+        plt.figure(figsize=(8, 4))
+        plt.plot(loss_values, label="Training Loss")
+        if "val_loss" in self.summary():
+            val_values = self.summary()["val_loss"]
+            plt.plot(val_values, label="Validation Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title(f"{self.__class__.__name__} training loss")
+        plt.legend()
+        if save_path is not None:
+            plt.savefig(save_path, format="png")
+        else:
+            plt.show()
 
     def save_last_model_to_file(self, file_path="./"):
         """Save the last epoch of the trained deep learning model.
